@@ -1,3 +1,7 @@
+;;;;;====version 0.004========;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 27/01/2020
+;; Some small bug fixes
+;;
 ;;;;;====version 0.003========;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; 25/01/2020
 ;  Added support for English version of Rage of Mages. Thanks to player BNegetive for feedback!

@@ -1,4 +1,8 @@
-﻿;;;;;====version 0.003========;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+﻿;;;;;====version 0.004========;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 27/01/2020
+;; Some small bug fixes
+;;
+;;;;;====version 0.003========;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; 25/01/2020
 ;  Added support for English version of Rage of Mages. Thanks to player BNegetive for feedback!
 ;  Fixed script self-termination
@@ -105,14 +109,24 @@
 	Global const $nPortr2x=280, $nPortr2y=528
 	Global const $nPortr3x=270, $nPortr3y=464
 
+	Global $EmptyColor=0, $EmptyColor2=0, $EmptyColor3=0
+
+	;; Pixels to check if we're inside the tavern
+	;;Global const $nTopBtn1x=708, $nTopBtn1y=202
+	;;Global const $nTopBtn2x=748, $nTopBtn2y=219
+	;;Global const $nTopBtn3x=772, $nTopBtn3y=198
+	;;Global $nColor1=0,$nColor2=0,$nColor3=0
+
 	; Pixels to check if we're inside the tavern
-	Global const $nTopBtn1x=708, $nTopBtn1y=202
-	Global const $nTopBtn2x=748, $nTopBtn2y=219
-	Global const $nTopBtn3x=772, $nTopBtn3y=198
-	Global $nColor1=0,$nColor2=0,$nColor3=0
+	Global const $nX1=480, $nY1=633
+	Global const $nX2=181, $nY2=399
+	Global const $nX3=499, $nY3=120
+	Global const $nX4=848, $nY4=371
+
+
 
 HotKeySet($ScriptExitKey, "Terminate")
-;HotKeySet($WriteCoordsKey, "WriteCoords")
+HotKeySet($WriteCoordsKey, "WriteCoords")
 ;HotKeySet($CountQuestsKey, "CountQuests")
 HotKeySet($GetTavernKey,"GetIntoTavern")
 ;HotKeySet("{f}","DenyQuests")
@@ -177,60 +191,67 @@ Func CountQuests()
 	; if Allods2 client is not running then kill the script
 	Allods2Running()
 
-	; Check how empty avatar looks like
-	$EmptyColor= Hex(PixelGetColor($nPortr1x, $nPortr1y, $hAllods2),6)
-	$EmptyColor2=Hex(PixelGetColor($nPortr2x, $nPortr2y, $hAllods2),6)
-	$EmptyColor3=Hex(PixelGetColor($nPortr3x, $nPortr3y, $hAllods2),6)
+	; !!!!add a check if there's already a task taken!!!!!!
+	; !!!!if taken we have to deny it!!!!!!!!!!!!!!!!!!!!!!
 
-	;move mouse cursor to quest 6
-	$Check=fCheckQ($q6x,$q6y,$EmptyColor,$EmptyColor2,$EmptyColor3,6)
-	If $Check<>0 Then
-		Return $Check
+	If CharInsideTavern() Then
+		If $EmptyColor=0 Then
+			; Check how empty avatar looks like
+			$EmptyColor= Hex(PixelGetColor($nPortr1x, $nPortr1y, $hAllods2),6)
+			$EmptyColor2=Hex(PixelGetColor($nPortr2x, $nPortr2y, $hAllods2),6)
+			$EmptyColor3=Hex(PixelGetColor($nPortr3x, $nPortr3y, $hAllods2),6)
+		EndIf
+
+		;move mouse cursor to quest 6
+		$Check=fCheckQ($q6x,$q6y,$EmptyColor,$EmptyColor2,$EmptyColor3,6)
+		If $Check<>0 Then
+			Return $Check
+		EndIf
+		;=======
+
+		;move mouse cursor to quest 5
+		$Check=fCheckQ($q5x, $q5y,$EmptyColor,$EmptyColor2,$EmptyColor3,5)
+		If $Check<>0 Then
+			Return $Check
+		EndIf
+
+		;=======
+
+		;move mouse cursor to quest 4
+		$Check=fCheckQ($q4x, $q4y,$EmptyColor,$EmptyColor2,$EmptyColor3,4)
+		If $Check<>0 Then
+			Return $Check
+		EndIf
+		;=======
+
+		;move mouse cursor to quest 3
+		$Check=fCheckQ($q3x, $q3y,$EmptyColor,$EmptyColor2,$EmptyColor3,3)
+		If $Check<>0 Then
+			Return $Check
+		EndIf
+		;=======
+
+		;move mouse cursor to quest 2
+		$Check=fCheckQ($q2x, $q2y,$EmptyColor,$EmptyColor2,$EmptyColor3,2)
+		If $Check<>0 Then
+			Return $Check
+		EndIf
+		;=======
+
+		;move mouse cursor to quest 1
+		$Check=fCheckQ($q1x, $q1y,$EmptyColor,$EmptyColor2,$EmptyColor3,1)
+		If $Check<>0 Then
+			Return $Check
+		EndIf
+		;=======
+
+
+		If $bDebug Then
+			WriteToLog("end of Counting quests function")
+		EndIf
+
+		Return 0
 	EndIf
-	;=======
-
-	;move mouse cursor to quest 5
-	$Check=fCheckQ($q5x, $q5y,$EmptyColor,$EmptyColor2,$EmptyColor3,5)
-	If $Check<>0 Then
-		Return $Check
-	EndIf
-
-	;=======
-
-	;move mouse cursor to quest 4
-	$Check=fCheckQ($q4x, $q4y,$EmptyColor,$EmptyColor2,$EmptyColor3,4)
-	If $Check<>0 Then
-		Return $Check
-	EndIf
-	;=======
-
-	;move mouse cursor to quest 3
-	$Check=fCheckQ($q3x, $q3y,$EmptyColor,$EmptyColor2,$EmptyColor3,3)
-	If $Check<>0 Then
-		Return $Check
-	EndIf
-	;=======
-
-	;move mouse cursor to quest 2
-	$Check=fCheckQ($q2x, $q2y,$EmptyColor,$EmptyColor2,$EmptyColor3,2)
-	If $Check<>0 Then
-		Return $Check
-	EndIf
-	;=======
-
-	;move mouse cursor to quest 1
-	$Check=fCheckQ($q1x, $q1y,$EmptyColor,$EmptyColor2,$EmptyColor3,1)
-	If $Check<>0 Then
-		Return $Check
-	EndIf
-	;=======
-
-
-	If $bDebug Then
-		WriteToLog("end of Counting quests function")
-	EndIf
-
-	Return 0
 EndFunc
 
 
@@ -278,9 +299,11 @@ EndFunc
 ;    Warning!!!  Map shouldn't be scrolled! Mouse cursor shouldn't be moved!
 ;;-------------------
 Func GetTavernCoords()
-	Local $aPos=MouseGetPos()
-	$tavernX=$aPos[0]
-	$tavernY=$aPos[1]
+	If CharInsideTavern()=False Then
+		Local $aPos=MouseGetPos()
+		$tavernX=$aPos[0]
+		$tavernY=$aPos[1]
+	EndIf
 EndFunc
 
 ;;-------EnterTavern()------------
@@ -293,16 +316,29 @@ Func EnterTavern()
 	; if Allods2 client is not running then kill the script
 	Allods2Running()
 
-	MouseMove($tavernX,$tavernY,$MouseSpeed)
-	MouseClick($MOUSE_CLICK_LEFT)
-
-	Sleep($TavEntryDelay)
-	If $nColor1=0 Then
-		; colours of the pixels of Top button in the tavern. obtained once
-		$nColor1=Hex(PixelGetColor($nTopBtn1x, $nTopBtn1y, $hAllods2),6)
-		$nColor2=Hex(PixelGetColor($nTopBtn2x, $nTopBtn2y, $hAllods2),6)
-		$nColor3=Hex(PixelGetColor($nTopBtn3x, $nTopBtn3y, $hAllods2),6)
+	If CharInsideTavern()=False Then
+		MouseMove($tavernX,$tavernY,$MouseSpeed)
+		MouseClick($MOUSE_CLICK_LEFT)
+		Sleep($TavEntryDelay)
+	Else
+		; no need to Enter the tavern
+		Return -1
 	EndIf
+	;If $nColor1=0 Then
+	;	; colours of the pixels of Top button in the tavern. obtained once
+	;	$nColor1=Hex(PixelGetColor($nTopBtn1x, $nTopBtn1y, $hAllods2),6)
+	;	$nColor2=Hex(PixelGetColor($nTopBtn2x, $nTopBtn2y, $hAllods2),6)
+	;	$nColor3=Hex(PixelGetColor($nTopBtn3x, $nTopBtn3y, $hAllods2),6)
+	;EndIf
+	Local $nTimer=$TavEntryDelay
+	While CharInsideTavern()=False
+		Sleep(100)
+		$nTimer=$nTimer-100
+		If $nTimer<=0 Then
+			WriteToLog("Failed to enter the tavern. Timout exceeded")
+			ExitLoop
+		EndIf
+	WEnd
 EndFunc
 
 ;;------GetIntoTavern()--------------
@@ -316,28 +352,7 @@ Func GetIntoTavern()
 	; if Allods2 client is not running then kill the script
 	Allods2Running()
 
-	If $nColor1<>0 Then
-		; we've entered the tavern before
-
-		; compare colours of the pixels
-		If 	$nColor1 <> Hex(PixelGetColor($nTopBtn1x, $nTopBtn1y, $hAllods2),6) And _
-			$nColor2 <> Hex(PixelGetColor($nTopBtn2x, $nTopBtn2y, $hAllods2),6) And _
-			$nColor3 <> Hex(PixelGetColor($nTopBtn3x, $nTopBtn3y, $hAllods2),6) Then
-				; we're outside and good to get in
-				GetTavernCoords()
-				EnterTavern()
-
-				; eternal cycle. We won't get here anyways
-				While True
-					$amount=CountQuests()
-					ScrollQuests($amount)
-				Wend
-		Else
-				; we're inside the tavern. exit function
-		EndIf
-	Else
-		; entering tavern for the first time
-
+	If CharInsideTavern()=False Then
 		GetTavernCoords()
 		EnterTavern()
 
@@ -347,6 +362,33 @@ Func GetIntoTavern()
 			ScrollQuests($amount)
 		Wend
 	EndIf
+
+	;If $nColor1<>0 Then
+		; we've entered the tavern before
+
+		; compare colours of the pixels
+	;	If 	$nColor1 <> Hex(PixelGetColor($nTopBtn1x, $nTopBtn1y, $hAllods2),6) And _
+	;		$nColor2 <> Hex(PixelGetColor($nTopBtn2x, $nTopBtn2y, $hAllods2),6) And _
+	;		$nColor3 <> Hex(PixelGetColor($nTopBtn3x, $nTopBtn3y, $hAllods2),6) Then
+				; we're outside and good to get in
+
+
+
+		;Else
+				; we're inside the tavern. exit function
+		;EndIf
+	;Else
+		; entering tavern for the first time
+
+	;	GetTavernCoords()
+	;	EnterTavern()
+
+		; eternal cycle
+	;	While True
+	;		$amount=CountQuests()
+	;		ScrollQuests($amount)
+	;	Wend
+	;EndIf
 EndFunc
 ;;----fCheckQ($x,$y,$ECol1,$ECol2,$ECol3,$q)
 ; $x     - x coordinate of a quest icon
@@ -359,25 +401,40 @@ EndFunc
 Func fCheckQ($x,$y,$ECol1,$ECol2,$ECol3,$q)
 	; if Allods2 client is not running then kill the script
 	Allods2Running()
-	; select a quest icon
-	MouseMove($x, $y, $MouseSpeed)
-	MouseClick($MOUSE_CLICK_LEFT)
 
-	; Getting colors of 3 pixels on the monster avatar
-	$CurrentColor= Hex(PixelGetColor($nPortr1x, $nPortr1y, $hAllods2),6)
-	$CurrentColor2=Hex(PixelGetColor($nPortr2x, $nPortr2y, $hAllods2),6)
-	$CurrentColor3=Hex(PixelGetColor($nPortr3x, $nPortr3y, $hAllods2),6)
+	If CharInsideTavern() Then
+		$CurrentColor= Hex(PixelGetColor($nPortr1x, $nPortr1y, $hAllods2),6)
+		$CurrentColor2=Hex(PixelGetColor($nPortr2x, $nPortr2y, $hAllods2),6)
+		$CurrentColor3=Hex(PixelGetColor($nPortr3x, $nPortr3y, $hAllods2),6)
 
-	;Compare pixel colors with an empty portrait
-	If $ECol1=$CurrentColor and $ECol2=$CurrentColor2 and $ECol3=$CurrentColor3 Then
-		;quest is empty
-		return 0
-	Else
-		If $bDebug Then
-			WriteToLog("" & $q & " quests found")
+		If Not ($CurrentColor=$EmptyColor and $CurrentColor2=$EmptyColor2 and $CurrentColor3=$EmptyColor3) Then
+			; we're already having a quest taken. Decline it
+			MouseMove($q1x, $q1y, $MouseSpeed)
+			MouseClick($MOUSE_CLICK_LEFT)
+			MouseClick($MOUSE_CLICK_LEFT)
+			ExitTavern()
+			EnterTavern()
 		EndIf
 
-		Return $q
+		; select a quest icon
+		MouseMove($x, $y, $MouseSpeed)
+		MouseClick($MOUSE_CLICK_LEFT)
+
+		; Getting colors of 3 pixels on the monster avatar
+		$CurrentColor= Hex(PixelGetColor($nPortr1x, $nPortr1y, $hAllods2),6)
+		$CurrentColor2=Hex(PixelGetColor($nPortr2x, $nPortr2y, $hAllods2),6)
+		$CurrentColor3=Hex(PixelGetColor($nPortr3x, $nPortr3y, $hAllods2),6)
+
+		;Compare pixel colors with an empty portrait
+		If $ECol1=$CurrentColor and $ECol2=$CurrentColor2 and $ECol3=$CurrentColor3 Then
+			;quest is empty
+			return 0
+		Else
+			If $bDebug Then
+				WriteToLog("" & $q & " quests found")
+			EndIf
+			Return $q
+		EndIf
 	EndIf
 EndFunc
 
@@ -416,34 +473,35 @@ Func DenyQuests($nQuests)
 	; if Allods2 client is not running then kill the script
 	Allods2Running()
 
-	For $i=1 to $nQuests
-		If $bDebug Then
-			WriteToLog("iteration " & $i & " start")
-		EndIf
+	If CharInsideTavern() Then
+		For $i=1 to $nQuests
+			If $bDebug Then
+				WriteToLog("iteration " & $i & " start")
+			EndIf
 
-		;Pick up left quest
-		MouseMove($q1x, $q1y, $MouseSpeed)
-		MouseClick($MOUSE_CLICK_LEFT)
-		MouseClick($MOUSE_CLICK_LEFT)
+			;Pick up left quest
+			MouseMove($q1x, $q1y, $MouseSpeed)
+			MouseClick($MOUSE_CLICK_LEFT)
+			MouseClick($MOUSE_CLICK_LEFT)
 
-		ExitTavern()
+			ExitTavern()
 
-		EnterTavern()
+			EnterTavern()
 
-		;Pick up left quest
-		MouseMove($q1x, $q1y, $MouseSpeed)
-		MouseClick($MOUSE_CLICK_LEFT)
-		MouseClick($MOUSE_CLICK_LEFT)
+			;Pick up left quest
+			MouseMove($q1x, $q1y, $MouseSpeed)
+			MouseClick($MOUSE_CLICK_LEFT)
+			MouseClick($MOUSE_CLICK_LEFT)
 
-		ExitTavern()
+			ExitTavern()
 
-		EnterTavern()
+			EnterTavern()
 
-		If $bDebug Then
-			WriteToLog("iteration " & $i & " end")
-		EndIf
-	Next
-
+			If $bDebug Then
+				WriteToLog("iteration " & $i & " end")
+			EndIf
+		Next
+	EndIf
 EndFunc
 
 
@@ -575,80 +633,88 @@ Func ScrollQuests($nAmount)
 	; if Allods2 client is not running then kill the script
 	Allods2Running()
 
-	Switch $nAmount
-		Case 1
-			Sleep($TavQuestsDelay)
-			DenyQuests(1)
-		Case 2
-			Sleep($TavQuestsDelay)
-			MouseMove($q1x, $q1y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			DenyQuests(2)
-		Case 3
-			Sleep($TavQuestsDelay)
-			MouseMove($q2x, $q2y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
+	If CharInsideTavern() Then
 
-			Sleep($TavQuestsDelay)
-			MouseMove($q1x, $q1y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
+		Switch $nAmount
+			Case 1
+				Sleep($TavQuestsDelay)
+				DenyQuests(1)
+			Case 2
+				Sleep($TavQuestsDelay)
+				MouseMove($q1x, $q1y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				DenyQuests(2)
+			Case 3
+				Sleep($TavQuestsDelay)
+				MouseMove($q2x, $q2y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
 
-			Sleep($TavQuestsDelay)
-			DenyQuests(3)
-		Case 4
-			Sleep($TavQuestsDelay)
-			MouseMove($q3x, $q3y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q2x, $q2y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q1x, $q1y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			DenyQuests(4)
-		Case 5
-			Sleep($TavQuestsDelay)
-			MouseMove($q4x, $q4y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q3x, $q3y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q2x, $q2y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q1x, $q1y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			DenyQuests(4)
-		Case 6
-			Sleep($TavQuestsDelay)
-			MouseMove($q5x, $q5y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q4x, $q4y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q3x, $q3y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q2x, $q2y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			MouseMove($q1x, $q1y, $MouseSpeed)
-			MouseClick($MOUSE_CLICK_LEFT)
-			Sleep($TavQuestsDelay)
-			DenyQuests(6)
-	EndSwitch
+				Sleep($TavQuestsDelay)
+				MouseMove($q1x, $q1y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+
+				Sleep($TavQuestsDelay)
+				DenyQuests(3)
+			Case 4
+				Sleep($TavQuestsDelay)
+				MouseMove($q3x, $q3y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q2x, $q2y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q1x, $q1y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				DenyQuests(4)
+			Case 5
+				Sleep($TavQuestsDelay)
+				MouseMove($q4x, $q4y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q3x, $q3y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q2x, $q2y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q1x, $q1y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				DenyQuests(4)
+			Case 6
+				Sleep($TavQuestsDelay)
+				MouseMove($q5x, $q5y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q4x, $q4y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q3x, $q3y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q2x, $q2y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				MouseMove($q1x, $q1y, $MouseSpeed)
+				MouseClick($MOUSE_CLICK_LEFT)
+				Sleep($TavQuestsDelay)
+				DenyQuests(6)
+		EndSwitch
+
+	EndIf
 EndFunc
 
 Func ExitTavern()
+	Allods2Running()
+
+	If CharInsideTavern() Then
 		;Exit tavern
 		Send("{ESC}")
 		; delay when exiting a tavern
 		Sleep($TavExitDelay)
+	EndIf
 EndFunc
 
 
@@ -670,5 +736,28 @@ Func Allods2Running()
 			WriteToLog("Exiting script, because Allods2 window does not exist")
 		EndIf
 		Terminate()
+	EndIf
+EndFunc
+
+
+;------
+; CharInsideTavern() function
+;
+; Checks if player is inside the tavern by comparing 4 pixels colours
+; returns true if inside
+;
+; parameter
+;
+; -----
+Func CharInsideTavern()
+	Local $nColor1=Hex(PixelGetColor($nX1, $nY1, $hAllods2),6)
+	Local $nColor2=Hex(PixelGetColor($nX2, $nY2, $hAllods2),6)
+	Local $nColor3=Hex(PixelGetColor($nX3, $nY3, $hAllods2),6)
+	Local $nColor4=Hex(PixelGetColor($nX4, $nY4, $hAllods2),6)
+	If $nColor1=$nColor2 and $nColor2=$nColor3 And $nColor3=$nColor4 Then
+		;we're inside a tavern
+		return True
+	Else
+		return False
 	EndIf
 EndFunc
